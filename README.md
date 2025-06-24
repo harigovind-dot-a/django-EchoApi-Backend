@@ -1,3 +1,1 @@
-# djangotutorial
-# djangotutorial
-# djangotutorial
+# My first hands-on in Django
