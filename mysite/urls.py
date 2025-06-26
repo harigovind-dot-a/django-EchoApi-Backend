@@ -15,12 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from django.urls import include  # Import include to include other URL configurations
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('polls/', include('polls.urls')),
+    path('', include('echoapp.urls')), # Include the echo app's URLs
+
 ]
-# This code sets up the URL routing for the Django project, linking the 'polls' app's URLs to the main project URLs.
-# The `include` function allows for modular URL configurations, making it easier to manage URLs in larger projects.
-# The `admin` path is included for accessing the Django admin interface.
