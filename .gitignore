@@ -1,5 +1,27 @@
-*.sqlite3
-echoapp/__pycache__/
-echoapp/migrations/__pycache__/
-echoapp/migrations/versions/*.pyc
-echoapp/migrations/versions/*.pyo
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore SQLite database
+db.sqlite3
+
+# Ignore Django migrations (optional)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Ignore virtual environments
+env/
+venv/
+ENV/
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# Ignore logs
+*.log
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
