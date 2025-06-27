@@ -1,2 +1,5 @@
-db.sqlite3
+*.sqlite3
 echoapp/__pycache__/
+echoapp/migrations/__pycache__/
+echoapp/migrations/versions/*.pyc
+echoapp/migrations/versions/*.pyo
