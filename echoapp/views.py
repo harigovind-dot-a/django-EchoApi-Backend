@@ -4,6 +4,7 @@ from django.utils.decorators import method_decorator
 import json
 from .models import Message
 from django.views import View
+from django.shortcuts import render
 
 @method_decorator(csrf_exempt, name='dispatch')
 class EchoView(View):
@@ -16,3 +17,7 @@ class EchoView(View):
         msgs = Message.objects.all().order_by('created_at')
         message_list = [{'content': msg.content, 'created_at': msg.created_at} for msg in msgs]
         return JsonResponse({'messages': message_list}, status=200)
+
+@csrf_exempt   
+def echo_form(request):
+    return render(request, 'echoapp/echo_form.html')

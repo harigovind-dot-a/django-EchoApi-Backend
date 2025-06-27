@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Echo API Form</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+      }
+      input,
+      button {
+        padding: 8px;
+        font-size: 16px;
+      }
+      #status {
+        margin-top: 15px;
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Send Message</h2>
+    <input type="text" id="message" placeholder="Enter your message" />
+    <button id="send">Send</button>
+    <div id="status"></div>
+
+    <script>
+      document.getElementById("send").addEventListener("click", () => {
+        const msg = document.getElementById("message").value;
+        fetch("/echo/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+        }).then((response) => {
+          if (response.ok) {
+            document.getElementById("status").textContent =
+              "The message is saved.";
+            document.getElementById("message").value = "";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
