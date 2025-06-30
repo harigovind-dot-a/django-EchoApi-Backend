@@ -1,23 +1,21 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator 
-import json
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from .serializers import MessageSerializer, EchoInputSerializer
 from .models import Message
-from django.views import View
 from django.shortcuts import render
 
-@method_decorator(csrf_exempt, name='dispatch')
-class EchoView(View):
-    def post(self, request):      
-        data = json.loads(request.body) 
-        message = data.get('message')
-        msg_save = Message.objects.create(content=message)
-        return JsonResponse({'echo': msg_save.content, 'timestamp' : msg_save.created_at}, status=200)
-    def get(self, request):
+class EchoView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = EchoInputSerializer(data=request.data)
+        if serializer.is_valid():
+            message = serializer.validated_data['message']
+            msg_obj = Message.objects.create(content=message)
+            return Response(MessageSerializer(msg_obj).data, status=status.HTTP_201_CREATED)
+    def get(self, *args, **kwargs):
         msgs = Message.objects.all().order_by('created_at')
-        message_list = [{'content': msg.content, 'created_at': msg.created_at} for msg in msgs]
-        return JsonResponse({'messages': message_list}, status=200)
+        serializer = MessageSerializer(msgs, many=True)
+        return Response({'all messages': serializer.data}, status=status.HTTP_200_OK)
 
-@csrf_exempt   
 def echo_form(request):
     return render(request, 'echoapp/echo_form.html')

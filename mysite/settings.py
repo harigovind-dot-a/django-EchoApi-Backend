@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'echoapp',  # Include the echo app
+    'rest_framework',  # Include Django REST Framework
 ]
 
 MIDDLEWARE = [
