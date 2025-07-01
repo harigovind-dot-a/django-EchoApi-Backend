@@ -22,7 +22,6 @@
   <body>
     <h2>Send Message</h2>
     <p>Enter a message to send to the Echo API:</p>
-    <input type="hidden" id="csrf-token" value="{{ csrf_token }}" />
     <input type="text" id="message" placeholder="Enter your message" />
     <button id="send">Send</button>
     <div id="status"></div>
@@ -30,12 +29,12 @@
     <script>
       document.getElementById("send").addEventListener("click", () => {
         const msg = document.getElementById("message").value;
-        const csrftoken = document.getElementById("csrf-token").value;
+        const token = localStorage.getItem("authToken");
         fetch("/echo/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrftoken,
+            Authorization: `Token ${token}`,
           },
           body: JSON.stringify({ message: msg }),
         }).then((response) => {

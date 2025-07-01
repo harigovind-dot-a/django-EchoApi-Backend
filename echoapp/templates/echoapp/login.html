@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login to Get Token</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+      }
+      input,
+      button {
+        padding: 8px;
+        font-size: 16px;
+        margin-top: 5px;
+        display: block;
+      }
+      #status {
+        margin-top: 15px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Login</h2>
+    <label>Username:</label>
+    <input type="text" id="username" placeholder="Username" />
+
+    <label>Password:</label>
+    <input type="password" id="password" placeholder="Password" />
+
+    <button id="login">Get Token</button>
+
+    <div id="status"></div>
+
+    <script>
+      document.getElementById("login").addEventListener("click", () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const statusEl = document.getElementById("status");
+
+        // Reset status message
+        statusEl.textContent = "Logging in...";
+
+        if (!username || !password) {
+          statusEl.textContent = "Please enter both username and password.";
+          return;
+        }
+
+        fetch("/api-token-auth/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.token) {
+              localStorage.setItem("authToken", data.token);
+              statusEl.style.color = "green";
+              statusEl.textContent = "Login successful! Token saved.";
+            } else if (data.non_field_errors) {
+              statusEl.style.color = "red";
+              statusEl.textContent =
+                "Error: " + data.non_field_errors.join(" ");
+            } else {
+              statusEl.style.color = "red";
+              statusEl.textContent = "Error: " + JSON.stringify(data);
+            }
+          })
+          .catch((err) => {
+            statusEl.style.color = "red";
+            statusEl.textContent = "Error: " + err.message;
+          });
+      });
+    </script>
+  </body>
+</html>
