@@ -1,35 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <title>Echo API Form</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 30px;
-      }
-      input,
-      button {
-        padding: 8px;
-        font-size: 16px;
-      }
-      #status {
-        margin-top: 15px;
-        color: green;
-        font-weight: bold;
-      }
-    </style>
+    <link rel="stylesheet" href="{% static 'echoapp/echo_form.css' %}" />
   </head>
   <body>
-    <h2>Send Message</h2>
-    <p>Enter a message to send to the Echo API:</p>
-    <input type="text" id="message" placeholder="Enter your message" />
-    <button id="send">Send</button>
-    <div id="status"></div>
+    <div class="container">
+      <h2>Send Message</h2>
+      <p>Enter a message to send to the Echo API:</p>
+      <input type="text" id="message" placeholder="Enter your message" />
+      <button id="send">Send</button>
+      <div id="status"></div>
+    </div>
 
     <script>
       document.getElementById("send").addEventListener("click", () => {
         const msg = document.getElementById("message").value;
         const token = localStorage.getItem("authToken");
+
         fetch("/echo/", {
           method: "POST",
           headers: {
