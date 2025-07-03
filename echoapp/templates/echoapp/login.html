@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EchoStore API - Login</title>
+    <title>Login - EchoStore API</title>
     <link rel="stylesheet" href="{% static 'echoapp/login.css' %}" />
   </head>
   <body>
@@ -14,7 +14,9 @@
           <h1 class="logo">EchoStore API</h1>
           <p>Send a message and get a JSON response echoed.</p>
           <h2>Sign In</h2>
+
           <form id="login-form">
+            {% csrf_token %}
             <input type="text" id="username" placeholder="Username" required />
             <input
               type="password"
@@ -24,8 +26,15 @@
             />
             <button type="submit">Sign In</button>
           </form>
+
           <div id="status"></div>
+          <div id="sendMessageButton" style="display: none; margin-top: 15px">
+            <a href="/echo-form/">
+              <button type="button">Send message</button>
+            </a>
+          </div>
         </div>
+
         <div class="login-info">
           <h2>Welcome to EchoStore API</h2>
           <img
@@ -42,6 +51,7 @@
         .getElementById("login-form")
         .addEventListener("submit", function (e) {
           e.preventDefault(); // prevent default form submission
+
           const username = document.getElementById("username").value.trim();
           const password = document.getElementById("password").value.trim();
           const statusEl = document.getElementById("status");
@@ -60,6 +70,8 @@
                 localStorage.setItem("authToken", data.token);
                 statusEl.style.color = "green";
                 statusEl.textContent = "Login successful! Token saved.";
+                document.getElementById("sendMessageButton").style.display =
+                  "block";
               } else if (data.non_field_errors) {
                 statusEl.style.color = "red";
                 statusEl.textContent =

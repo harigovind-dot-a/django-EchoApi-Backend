@@ -4,7 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import MessageSerializer, EchoInputSerializer
 from .models import Message
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib import messages
 
 class EchoView(APIView):
     
@@ -30,3 +32,32 @@ def echo_form(request):
 
 def login_page(request):
     return render(request, 'echoapp/login.html')
+
+def register_success(request):
+    return render(request, 'echoapp/registr_success.html')
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Sever-side validation other than the form validation
+        if len(username) < 8 or len(password) < 8:
+            messages.error(request, "Username and password must be at least 8 characters.")
+            return redirect('register')        
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect('register')
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+            return redirect('register')
+
+        User.objects.create_user(username=username, email=email, password=password).save()
+        
+        return redirect('register_success')
+    return render(request, 'echoapp/registration.html')
+
+def home(request):
+    return render(request, 'echoapp/home.html')

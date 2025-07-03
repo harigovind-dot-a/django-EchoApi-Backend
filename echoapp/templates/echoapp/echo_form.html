@@ -29,8 +29,8 @@
           body: JSON.stringify({ message: msg }),
         }).then((response) => {
           if (response.ok) {
-            document.getElementById("status").textContent =
-              "The message is saved.";
+            document.getElementById("status").innerHTML =
+              "The message is saved. <a href='/echo/'>CLICK HERE</a> to see the JSON response.";
             document.getElementById("message").value = "";
           }
         });
