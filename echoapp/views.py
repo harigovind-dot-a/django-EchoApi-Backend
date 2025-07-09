@@ -7,6 +7,7 @@ from .models import Message
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.views.generic import TemplateView, View
 
 class EchoView(APIView):
     
@@ -27,37 +28,42 @@ class EchoView(APIView):
         serializer = MessageSerializer(msgs, many=True)
         return Response({'all messages': serializer.data}, status=status.HTTP_200_OK)
 
-def echo_form(request):
-    return render(request, 'echoapp/echo_form.html')
+class EchoFormView(TemplateView):
+    template_name = 'echoapp/echo_form.html'
 
-def login_page(request):
-    return render(request, 'echoapp/login.html')
+class LoginPageView(TemplateView):
+    template_name = 'echoapp/login.html'
 
-def register_success(request):
-    return render(request, 'echoapp/registr_success.html')
+class RegisterSuccessView(TemplateView):
+    template_name = 'echoapp/registr_success.html'
 
-def register(request):
-    if request.method == 'POST':
+class RegisterView(View):
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'echoapp/registration.html')
+    
+    def post(self, request, *args, **kwargs):
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
-        # Sever-side validation other than the form validation
         if len(username) < 8 or len(password) < 8:
             messages.error(request, "Username and password must be at least 8 characters.")
             return redirect('register')        
-        if password != confirm_password:
+        elif password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect('register')
-        if User.objects.filter(username=username).exists():
+        elif User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists.")
             return redirect('register')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists.")
+            return redirect('register')
+        else:
+            User.objects.create_user(username=username, email=email, password=password).save()
+            messages.success(request, "Registration successful. You can now log in.")
+            return redirect('register_success')
 
-        User.objects.create_user(username=username, email=email, password=password).save()
-        
-        return redirect('register_success')
-    return render(request, 'echoapp/registration.html')
-
-def home(request):
-    return render(request, 'echoapp/home.html')
+class HomeView(TemplateView):
+    template_name = 'echoapp/home.html'
