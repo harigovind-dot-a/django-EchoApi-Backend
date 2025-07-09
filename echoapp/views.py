@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.generic import TemplateView, View
+from django.contrib.auth import authenticate, login
 
 class EchoView(APIView):
     
@@ -32,8 +33,28 @@ class EchoFormView(TemplateView):
     template_name = 'echoapp/echo_form.html'
 
 class LoginPageView(TemplateView):
-    template_name = 'echoapp/login.html'
 
+    def get(self, request, *args, **kwargs):
+        return render(request, 'echoapp/login.html')
+    
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if not username or not password:
+            messages.error(request, "Username and password are required.")
+            return redirect('login')
+        elif len(username) < 8 or len(password) < 8:
+            messages.error(request, "Username and password must be at least 8 characters.")
+            return redirect('login')
+        else:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('echo_form')
+            else:
+                messages.error(request, "Invalid username or password.")
+                return redirect('login')
+            
 class RegisterSuccessView(TemplateView):
     template_name = 'echoapp/registr_success.html'
 
