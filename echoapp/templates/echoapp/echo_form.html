@@ -3,21 +3,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Echo API Form</title>
-    <link rel="stylesheet" href="{% static 'echoapp/echo_form.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static 'echoapp/login.css' %}" />
   </head>
   <body>
-    <div class="container">
-      <h2>Send Message</h2>
-      <p>Enter a message to send to the Echo API:</p>
-      <input type="text" id="message" placeholder="Enter your message" />
-      <button id="send">Send</button>
-      <div id="status"></div>
+    <div class="wrapper bg-white">
+      <div class="h2 text-center">Echo Store API</div>
+      <div class="h4 text-muted text-center pt-2">Send a Message</div>
+
+      <form method="POST" class="pt-3">
+        {% csrf_token %}
+        <div class="form-group py-2">
+          <div class="input-field">
+            <span class="fas fa-envelope p-2"></span>
+            <input
+              type="text"
+              id="message"
+              name="message"
+              placeholder="Enter your message"
+              required
+              class=""
+            />
+          </div>
+        </div>
+
+        <button type="button" id="send" class="btn btn-block text-center my-3">
+          Send Message
+        </button>
+
+        <div id="status" class="text-success text-center pt-2"></div>
+      </form>
     </div>
 
     <script>
       document.getElementById("send").addEventListener("click", () => {
-        const msg = document.getElementById("message").value;
+        const msg = document.getElementById("message").value.trim();
         const token = localStorage.getItem("authToken");
 
         fetch("/echo/", {

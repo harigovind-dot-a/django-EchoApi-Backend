@@ -5,53 +5,88 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Registration - Echo Store API</title>
-    <link rel="stylesheet" href="{% static 'echoapp/registration.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static 'echoapp/login.css' %}" />
   </head>
   <body>
-    <div class="container">
-      <h1>EchoStore API</h1>
-      <h3>User Registration</h3>
-      <form id="registration-form" method="POST">
+    <div class="wrapper bg-white">
+      <div class="h2 text-center">Echo Store API</div>
+      <div class="h4 text-muted text-center pt-2">Create a new account</div>
+
+      <form id="registration-form" method="POST" class="pt-3">
         {% csrf_token %}
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Username"
-          required
-        />
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Password"
-          required
-        />
-        <input
-          type="password"
-          id="confirm_password"
-          name="confirm_password"
-          placeholder="Confirm Password"
-          required
-        />
 
-        <button type="submit">Register</button>
+        <div class="form-group py-2">
+          <div class="input-field">
+            <span class="far fa-user p-2"></span>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group py-2">
+          <div class="input-field">
+            <span class="far fa-envelope p-2"></span>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group py-1">
+          <div class="input-field">
+            <span class="fas fa-lock p-2"></span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group py-1">
+          <div class="input-field">
+            <span class="fas fa-lock p-2"></span>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              placeholder="Confirm Password"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-block text-center my-3">
+          Register
+        </button>
+
+        <div id="warning" class="text-danger text-center"></div>
+
+        {% if messages %} {% for message in messages %}
+        <p class="text-danger text-center">{{ message }}</p>
+        {% endfor %} {% endif %}
+
+        <div class="text-center pt-3 text-muted">
+          Already have an account? <a href="/log-in/">Log in</a>
+        </div>
       </form>
-
-      <!-- JavaScript client-side warning -->
-      <p id="warning" class="warning"></p>
-
-      <!-- Django server-side errors-->
-      {% if messages %} {% for message in messages %}
-      <p class="warning">{{ message }}</p>
-      {% endfor %} {% endif %}
     </div>
 
     <script>
@@ -68,16 +103,9 @@
 
           warning.textContent = "";
 
-          if (username.length < 8 || password.length < 8) {
+          if (username.length < 5 || password.length < 5) {
             warning.textContent =
-              "Both Username and password must be at least 8 characters long.";
-            e.preventDefault();
-            return;
-          }
-
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailPattern.test(email)) {
-            warning.textContent = "Please enter a valid email address.";
+              "Both Username and password must be at least 5 characters long.";
             e.preventDefault();
             return;
           }

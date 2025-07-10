@@ -4,52 +4,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - EchoStore API</title>
+    <title>Log In - Echo Store API</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" href="{% static 'echoapp/login.css' %}" />
   </head>
   <body>
-    <div class="container">
-      <div class="login-box">
-        <div class="login-form">
-          <h1 class="logo">EchoStore API</h1>
-          <p>Send a message and get a JSON response echoed.</p>
-          <h2>Sign In</h2>
+    <div class="wrapper bg-white">
+      <div class="h2 text-center">Echo Store API</div>
+      <div class="h4 text-muted text-center pt-2">Enter your login details</div>
 
-          <form id="login-form" method="POST">
-            {% csrf_token %}
+      <form id="login-form" method="POST" class="pt-3">
+        {% csrf_token %}
+        <div class="form-group py-2">
+          <div class="input-field">
+            <span class="far fa-user p-2"></span>
             <input
               type="text"
               id="username"
               name="username"
               placeholder="Username"
               required
+              class=""
             />
+          </div>
+        </div>
+        <div class="form-group py-1 pb-2">
+          <div class="input-field">
+            <span class="fas fa-lock p-2"></span>
             <input
               type="password"
               id="password"
               name="password"
-              placeholder="Password"
+              placeholder="Enter your Password"
               required
+              class=""
             />
-            <button type="submit">Sign In</button>
-          </form>
-
-          <div id="warning" class="warning"></div>
-
-          {% if messages %} {% for message in messages %}
-          <p class="warning">{{ message }}</p>
-          {% endfor %} {% endif %}
+          </div>
         </div>
+        <div class="d-flex align-items-start"></div>
+        <button type="submit" class="btn btn-block text-center my-3">
+          Log in
+        </button>
 
-        <div class="login-info">
-          <h2>Welcome to EchoStore API</h2>
-          <img
-            src="{% static 'echoapp/echo.webp' %}"
-            alt="Echo Logo"
-            class="illustration"
-          />
+        <div id="warning" class="text-danger text-center"></div>
+        {% if messages %} {% for message in messages %}
+        <p class="text-danger text-center">{{ message }}</p>
+        {% endfor %} {% endif %}
+
+        <div class="text-center pt-3 text-muted">
+          Do not have an account? <a href="/registration/">Register</a>
         </div>
-      </div>
+      </form>
     </div>
 
     <script>
@@ -62,12 +72,31 @@
 
           warning.textContent = "";
 
-          if (username < 8 || password.length < 8) {
+          if (username.length < 5 || password.length < 5) {
             warning.textContent =
-              "Username and password must be at least 8 characters.";
+              "Username and password must be at least 5 characters.";
             e.preventDefault();
             return;
           }
+          fetch("/api-token-auth/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.token) {
+                localStorage.setItem("authToken", data.token);
+                window.location.href = "/echo-form/";
+              } else {
+                warning.textContent = "Error: " + JSON.stringify(data);
+              }
+            })
+            .catch((err) => {
+              warning.textContent = "Error: " + err.message;
+            });
         });
     </script>
   </body>

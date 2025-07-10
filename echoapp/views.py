@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.generic import TemplateView, View
 from django.contrib.auth import authenticate, login
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 class EchoView(APIView):
     
@@ -43,7 +45,7 @@ class LoginPageView(TemplateView):
         if not username or not password:
             messages.error(request, "Username and password are required.")
             return redirect('login')
-        elif len(username) < 8 or len(password) < 8:
+        elif len(username) < 5 or len(password) < 5:
             messages.error(request, "Username and password must be at least 8 characters.")
             return redirect('login')
         else:
@@ -69,8 +71,8 @@ class RegisterView(View):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
-        if len(username) < 8 or len(password) < 8:
-            messages.error(request, "Username and password must be at least 8 characters.")
+        if len(username) < 5 or len(password) < 5:
+            messages.error(request, "Username and password must be at least 5 characters.")
             return redirect('register')        
         elif password != confirm_password:
             messages.error(request, "Passwords do not match.")
@@ -78,7 +80,13 @@ class RegisterView(View):
         elif User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists.")
             return redirect('register')
-        elif User.objects.filter(email=email).exists():
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, "Invalid email address.")
+                return redirect('register')
+        if User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists.")
             return redirect('register')
         else:
@@ -86,5 +94,3 @@ class RegisterView(View):
             messages.success(request, "Registration successful. You can now log in.")
             return redirect('register_success')
 
-class HomeView(TemplateView):
-    template_name = 'echoapp/home.html'
