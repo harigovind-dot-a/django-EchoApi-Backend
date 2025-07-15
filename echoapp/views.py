@@ -1,67 +1,49 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import MessageSerializer, EchoInputSerializer
-from .models import Message
+from rest_framework import viewsets, permissions
+from .serializers import MessageSerializer
+from .models import Message, CustomUser
+from django.db import IntegrityError
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib import messages
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
-from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from rest_framework.decorators import action
 
-class EchoView(APIView):
-    
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return[IsAuthenticated()]
-        return [AllowAny()]
-
-    def post(self, request, *args, **kwargs):
-        serializer = EchoInputSerializer(data=request.data)
-        if serializer.is_valid():
-            message = serializer.validated_data['message']
-            msg_obj = Message.objects.create(content=message)
-            return Response(MessageSerializer(msg_obj).data, status=status.HTTP_201_CREATED)
-
-    def get(self, *args, **kwargs):
-        msgs = Message.objects.all().order_by('created_at')
-        serializer = MessageSerializer(msgs, many=True)
-        return Response({'all messages': serializer.data}, status=status.HTTP_200_OK)
+@action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+class EchoStoreViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
+    queryset = Message.objects.all().order_by('created_at')
 
 class EchoFormView(TemplateView):
     template_name = 'echoapp/echo_form.html'
 
 class LoginPageView(TemplateView):
-
     def get(self, request, *args, **kwargs):
         return render(request, 'echoapp/login.html')
     
     def post(self, request, *args, **kwargs):
         username = request.POST.get('username')
         password = request.POST.get('password')
-        if not username or not password:
-            messages.error(request, "Username and password are required.")
+        
+        try:
+            temp_user = CustomUser(username=username, password=password, email="dummy@example.com")
+            temp_user.full_clean()
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
             return redirect('login')
-        elif len(username) < 5 or len(password) < 5:
-            messages.error(request, "Username and password must be at least 8 characters.")
-            return redirect('login')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('echo_form')
         else:
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('echo_form')
-            else:
-                messages.error(request, "Invalid username or password.")
-                return redirect('login')
+            messages.error(request, "Invalid username/password")
+            return redirect('login')
             
 class RegisterSuccessView(TemplateView):
     template_name = 'echoapp/registr_success.html'
 
-class RegisterView(View):
-
+class RegisterView(TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request, 'echoapp/registration.html')
     
@@ -71,26 +53,24 @@ class RegisterView(View):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
-        if len(username) < 5 or len(password) < 5:
-            messages.error(request, "Username and password must be at least 5 characters.")
-            return redirect('register')        
-        elif password != confirm_password:
+        if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return redirect('register')
-        elif User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists.")
-            return redirect('register')
         else:
-            try:
-                validate_email(email)
-            except ValidationError:
-                messages.error(request, "Invalid email address.")
+            try: 
+                user = CustomUser(username=username, email=email)
+                user.set_password(password)
+                user.full_clean()
+                user.save()
+                return redirect('register_success')
+            except ValidationError as e:
+                messages.error(request, f"Validation error: {e}")
                 return redirect('register')
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email already exists.")
-            return redirect('register')
-        else:
-            User.objects.create_user(username=username, email=email, password=password).save()
-            messages.success(request, "Registration successful. You can now log in.")
-            return redirect('register_success')
-
+            except IntegrityError as e:
+                if 'username' in str(e):
+                    messages.error(request, "Username already exists.")
+                elif 'email' in str(e):
+                    messages.error(request, "Email already exists.")
+                else:
+                    messages.error(request, "Registration failed due to a database constraint.")
+                return redirect('register')

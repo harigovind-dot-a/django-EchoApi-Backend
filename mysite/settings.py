@@ -133,3 +133,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',  # Allow any user to access the API
     ],
 }
+
+AUTH_USER_MODEL = 'echoapp.CustomUser'

@@ -53,7 +53,7 @@
             "Content-Type": "application/json",
             Authorization: `Token ${token}`,
           },
-          body: JSON.stringify({ message: msg }),
+          body: JSON.stringify({ content: msg }),
         }).then((response) => {
           if (response.ok) {
             document.getElementById("status").innerHTML =
