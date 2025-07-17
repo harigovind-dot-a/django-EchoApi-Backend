@@ -12,17 +12,3 @@ class Message(models.Model):
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-
-    def clean(self):
-        super().clean()
-        if len(self.username) < 5:
-            raise ValidationError("Username should be atleast 5 chars long.")
-        elif self._raw_password is not None and len(self._raw_password) < 5:
-            raise ValidationError("Password should be atleast 5 chars long.")
-        else:
-            pass
-        EmailValidator()(self.email)
-
-    def set_password(self, raw_password):
-        self._raw_password = raw_password
-        super().set_password(raw_password)

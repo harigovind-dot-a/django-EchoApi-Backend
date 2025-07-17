@@ -18,7 +18,7 @@
       <div class="h2 text-center">Echo Store API</div>
       <div class="h4 text-muted text-center pt-2">Enter your login details</div>
 
-      <form id="login-form" method="POST" class="pt-3">
+      <form id="login-form" class="pt-3">
         {% csrf_token %}
         <div class="form-group py-2">
           <div class="input-field">
@@ -29,10 +29,11 @@
               name="username"
               placeholder="Username"
               required
-              class=""
+              class="form-control"
             />
           </div>
         </div>
+
         <div class="form-group py-1 pb-2">
           <div class="input-field">
             <span class="fas fa-lock p-2"></span>
@@ -42,22 +43,19 @@
               name="password"
               placeholder="Enter your Password"
               required
-              class=""
+              class="form-control"
             />
           </div>
         </div>
-        <div class="d-flex align-items-start"></div>
-        <button type="submit" class="btn btn-block text-center my-3">
+
+        <div id="warning" class="text-danger text-center small mb-2"></div>
+
+        <button type="submit" class="btn btn-primary btn-block my-3">
           Log in
         </button>
 
-        <div id="warning" class="text-danger text-center"></div>
-        {% if messages %} {% for message in messages %}
-        <p class="text-danger text-center">{{ message }}</p>
-        {% endfor %} {% endif %}
-
         <div class="text-center pt-3 text-muted">
-          Do not have an account? <a href="/registration/">Register</a>
+          Don't have an account? <a href="/registration/">Register</a>
         </div>
       </form>
     </div>
@@ -66,18 +64,19 @@
       document
         .getElementById("login-form")
         .addEventListener("submit", function (e) {
+          e.preventDefault();
+
           const username = document.getElementById("username").value.trim();
           const password = document.getElementById("password").value.trim();
           const warning = document.getElementById("warning");
 
           warning.textContent = "";
 
-          if (username.length < 5 || password.length < 5) {
-            warning.textContent =
-              "Username and password must be at least 5 characters.";
-            e.preventDefault();
+          if (!username || !password) {
+            warning.textContent = "Both fields are required.";
             return;
           }
+
           fetch("/api-token-auth/", {
             method: "POST",
             headers: {
@@ -90,12 +89,14 @@
               if (data.token) {
                 localStorage.setItem("authToken", data.token);
                 window.location.href = "/echo-form/";
+              } else if (data.non_field_errors) {
+                warning.textContent = data.non_field_errors[0];
               } else {
-                warning.textContent = "Error: " + JSON.stringify(data);
+                warning.textContent = "Invalid login credentials.";
               }
             })
             .catch((err) => {
-              warning.textContent = "Error: " + err.message;
+              warning.textContent = "Network error: " + err.message;
             });
         });
     </script>

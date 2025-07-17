@@ -24,5 +24,5 @@ from rest_framework.authtoken.views import obtain_auth_token
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('echoapp.urls')), # Include the echo app's URLs
-    path('api-token-auth/', csrf_exempt(obtain_auth_token)),  # URL for obtaining auth token
+    path('api-token-auth/', csrf_exempt(obtain_auth_token), name='api_token_auth'),  # URL for obtaining auth token
 ]
