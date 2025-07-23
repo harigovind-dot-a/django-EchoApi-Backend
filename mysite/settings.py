@@ -130,8 +130,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Allow any user to access the API
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
-AUTH_USER_MODEL = 'echoapp.CustomUser'
+LOGIN_REDIRECT_URL = '/echo-form/'

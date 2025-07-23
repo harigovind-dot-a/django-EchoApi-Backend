@@ -14,52 +14,100 @@
     <link rel="stylesheet" href="{% static 'echoapp/login.css' %}" />
   </head>
   <body>
-    <div class="wrapper bg-white">
-      <div class="h2 text-center">Echo Store API</div>
-      <div class="h4 text-muted text-center pt-2">Send a Message</div>
+    <div class="container mt-5">
+      <div class="position-relative p-4 bg-white rounded shadow" style="max-width: 500px; margin: 0 auto;">
+        <!-- Logout button -->
+        <a href="#" id="logout-link" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">
+          Logout
+        </a>
 
-      <form method="POST" class="pt-3">
-        {% csrf_token %}
-        <div class="form-group py-2">
-          <div class="input-field">
-            <span class="fas fa-envelope p-2"></span>
+        <h2 class="h2 text-center">Echo Store API</h2>
+        <h5 class="h4 text-muted text-center pt-2">Send a Message</h5>
+
+        <form method="POST" class="pt-3">
+          {% csrf_token %}
+          <div class="form-group py-2">
             <input
               type="text"
               id="message"
               name="message"
               placeholder="Enter your message"
               required
-              class=""
+              class="form-control"
             />
           </div>
-        </div>
 
-        <button type="button" id="send" class="btn btn-block text-center my-3">
-          Send Message
-        </button>
+          <button type="button" id="send" class="btn btn-block text-center my-3">
+            Send Message
+          </button>
 
-        <div id="status" class="text-success text-center pt-2"></div>
-      </form>
+          <div id="status" class="text-success text-center pt-3"></div>
+        </form>
+      </div>
     </div>
 
     <script>
-      document.getElementById("send").addEventListener("click", () => {
-        const msg = document.getElementById("message").value.trim();
-        const token = localStorage.getItem("authToken");
+      document.addEventListener("DOMContentLoaded", function () {
+        const sendButton = document.getElementById("send");
+        const logoutLink = document.getElementById("logout-link");
+        const status = document.getElementById("status");
 
-        fetch("/echo/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify({ content: msg }),
-        }).then((response) => {
-          if (response.ok) {
-            document.getElementById("status").innerHTML =
-              "The message is saved. <a href='/echo/'>CLICK HERE</a> to see the JSON response.";
-            document.getElementById("message").value = "";
+        sendButton.addEventListener("click", () => {
+          const msg = document.getElementById("message").value.trim();
+          const token = localStorage.getItem("authToken");
+
+          if (!token) {
+            alert("You are not logged in. Redirecting to login.");
+            window.location.href = "/log-in/";
+            return;
           }
+
+          fetch("/echo/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Token ${token}`,
+            },
+            body: JSON.stringify({ content: msg }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                status.innerHTML =
+                  "The message is saved. <a href='/echo/'>CLICK HERE</a> to see the JSON response.";
+                document.getElementById("message").value = "";
+              } else if (response.status === 401) {
+                status.innerHTML =
+                  'Unauthorized. Token might be invalid or expired. <a href="/log-in/">Log in again</a>';
+              } else {
+                return response.json().then((data) => {
+                  status.innerHTML = `Error: Empty string not allowed`;
+                });
+              }
+            })
+            .catch((err) => {
+              console.error("Fetch error:", err);
+              status.innerHTML = `Fetch error: ${err.message}`;
+            });
+        });
+
+        logoutLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          const token = localStorage.getItem("authToken");
+
+          if (!token) {
+            window.location.href = "/log-in/";
+            return;
+          }
+
+          fetch("/logout/", {
+            method: "GET",
+            headers: {
+              "Authorization": `Token ${token}`,
+            }
+          }).then(() => {
+            localStorage.removeItem("authToken");
+            window.location.href = "/log-in/";
+          });
         });
       });
     </script>

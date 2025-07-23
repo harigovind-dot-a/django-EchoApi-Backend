@@ -18,9 +18,8 @@
       <div class="h2 text-center">Echo Store API</div>
       <div class="h4 text-muted text-center pt-2">Create a new account</div>
 
-      <form id="registration-form" method="POST" class="pt-3">
+      <form method="POST" class="pt-3">
         {% csrf_token %}
-
         <div class="form-group py-2">
           <div class="input-field">
             <span class="far fa-user p-2"></span>
@@ -29,55 +28,78 @@
               id="username"
               name="username"
               placeholder="Username"
+              value="{{ form.username.value|default:'' }}"
               required
+              class="form-control"
             />
           </div>
+          {% if form.username.errors %}
+          <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+          {% endif %}
         </div>
-
         <div class="form-group py-2">
           <div class="input-field">
             <span class="far fa-envelope p-2"></span>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
               placeholder="Email"
+              value="{{ form.email.value|default:'' }}"
               required
+              class="form-control"
             />
           </div>
+          {% if form.email.errors %}
+          <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+          {% endif %}
         </div>
-
         <div class="form-group py-1">
           <div class="input-field">
             <span class="fas fa-lock p-2"></span>
             <input
               type="password"
-              id="password"
-              name="password"
+              id="password1"
+              name="password1"
               placeholder="Password"
               required
+              class="form-control"
             />
           </div>
+          {% if form.password1.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.password1.errors.0 }}
+          </div>
+          {% endif %}
         </div>
-
         <div class="form-group py-1">
           <div class="input-field">
             <span class="fas fa-lock p-2"></span>
             <input
               type="password"
-              id="confirm_password"
-              name="confirm_password"
+              id="password2"
+              name="password2"
               placeholder="Confirm Password"
               required
+              class="form-control"
             />
           </div>
+          {% if form.password2.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.password2.errors.0 }}
+          </div>
+          {% endif %}
         </div>
 
-        <button type="submit" class="btn btn-block text-center my-3">
+        {% if form.non_field_errors %}
+        <div class="text-danger text-center mt-2">
+          {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-block my-3">
           Register
         </button>
-
-        <div id="warning" class="text-danger text-center"></div>
 
         {% if messages %} {% for message in messages %}
         <p class="text-danger text-center">{{ message }}</p>
@@ -88,34 +110,5 @@
         </div>
       </form>
     </div>
-
-    <script>
-      document
-        .getElementById("registration-form")
-        .addEventListener("submit", function (e) {
-          const username = document.getElementById("username").value.trim();
-          const email = document.getElementById("email").value.trim();
-          const password = document.getElementById("password").value.trim();
-          const confirmPassword = document
-            .getElementById("confirm_password")
-            .value.trim();
-          const warning = document.getElementById("warning");
-
-          warning.textContent = "";
-
-          if (username.length < 5 || password.length < 5) {
-            warning.textContent =
-              "Both Username and password must be at least 5 characters long.";
-            e.preventDefault();
-            return;
-          }
-
-          if (password !== confirmPassword) {
-            warning.textContent = "Passwords is not matching!";
-            e.preventDefault();
-            return;
-          }
-        });
-    </script>
   </body>
 </html>

@@ -29,10 +29,10 @@
               name="username"
               placeholder="Username"
               required
-              class=""
             />
           </div>
         </div>
+
         <div class="form-group py-1 pb-2">
           <div class="input-field">
             <span class="fas fa-lock p-2"></span>
@@ -42,19 +42,28 @@
               name="password"
               placeholder="Enter your Password"
               required
-              class=""
             />
           </div>
         </div>
-        <div class="d-flex align-items-start"></div>
+
         <button type="submit" class="btn btn-block text-center my-3">
           Log in
         </button>
 
         <div id="warning" class="text-danger text-center"></div>
-        {% if messages %} {% for message in messages %}
-        <p class="text-danger text-center">{{ message }}</p>
-        {% endfor %} {% endif %}
+
+        {% if form.errors %}
+        <div class="text-danger text-center">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
 
         <div class="text-center pt-3 text-muted">
           Do not have an account? <a href="/registration/">Register</a>
@@ -63,41 +72,45 @@
     </div>
 
     <script>
-      document
-        .getElementById("login-form")
-        .addEventListener("submit", function (e) {
-          const username = document.getElementById("username").value.trim();
-          const password = document.getElementById("password").value.trim();
-          const warning = document.getElementById("warning");
+      document.getElementById("login-form").addEventListener("submit", function (e) {
+        e.preventDefault();
 
-          warning.textContent = "";
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const warning = document.getElementById("warning");
 
-          if (username.length < 5 || password.length < 5) {
-            warning.textContent =
-              "Username and password must be at least 5 characters.";
-            e.preventDefault();
-            return;
+        warning.textContent = "";
+
+        if (username.length < 8 || password.length < 8) {
+          warning.textContent = "Username and password must be at least 8 characters.";
+          return;
+        }
+
+        fetch("/log-in/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username: username, password: password })
+        })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Login failed.");
           }
-          fetch("/api-token-auth/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.token) {
-                localStorage.setItem("authToken", data.token);
-                window.location.href = "/echo-form/";
-              } else {
-                warning.textContent = "Error: " + JSON.stringify(data);
-              }
-            })
-            .catch((err) => {
-              warning.textContent = "Error: " + err.message;
-            });
+          return res.json();
+        })
+        .then((data) => {
+          if (data.token) {
+            localStorage.setItem("authToken", data.token);
+            window.location.href = "/echo-form/";
+          } else {
+            warning.textContent = "Login failed. No token returned.";
+          }
+        })
+        .catch((err) => {
+          warning.textContent = err.message;
         });
+      });
     </script>
   </body>
 </html>
