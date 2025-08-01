@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from .serializers import MessageSerializer
@@ -18,8 +18,9 @@ import json
 class EchoStoreViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     queryset = Message.objects.all().order_by('created_at')
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # authentication_classes = [TokenAuthentication] # For template login to work.
+    # permission_classes = [IsAuthenticatedOrReadOnly] # For template login to work
+    permission_classes = [AllowAny] # For angular to GET and POST without auth. Remove this for django templates to work.
 
 class EchoFormView(TemplateView):
     template_name = 'echoapp/echo_form.html'

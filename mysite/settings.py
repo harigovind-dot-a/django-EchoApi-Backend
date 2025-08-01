@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'echoapp',  # Include the echo app
     'rest_framework',  # Include Django REST Framework
     'rest_framework.authtoken',  # Include token authentication
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -135,3 +137,9 @@ REST_FRAMEWORK = {
 }
 
 LOGIN_REDIRECT_URL = '/echo-form/'
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+]
